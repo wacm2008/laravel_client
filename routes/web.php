@@ -14,8 +14,3 @@
 Route::get('/', function () {
     return view('welcome');
 });
-//curl get post
-Route::get('/users','TestController@users');
-Route::post('/users/a','TestController@usersA');
-Route::post('/users/b','TestController@usersB');
-Route::post('/users/c','TestController@usersC');
