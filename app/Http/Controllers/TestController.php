@@ -120,15 +120,15 @@ class TestController extends Controller
             'title'=>'订单测试',
             'name'=>'isco'
         ];
-        $json=json_encode($data);
+        $json=json_encode($data,JSON_UNESCAPED_UNICODE);
         $key=openssl_get_privatekey('file://'.storage_path('app/keys/private.pem'));
         //用私钥对数据签名
         openssl_sign($json,$signature,$key);
         //var_dump($signature);
         $base64=base64_encode($signature);
-        echo $base64.'<hr>';
+        //echo $base64.'<hr>';
         $url='http://api.1809a.com/test/firma?firma='.urlencode($base64);
-        echo $url.'<hr>';
+        //echo $url.'<hr>';
         // 创建一个新cURL资源
         $ch = curl_init();
         //echo $ch;die;
