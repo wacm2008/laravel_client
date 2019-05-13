@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\UsersModel;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Redis;
 class TestController extends Controller
 {
     //凯撒加密
@@ -137,6 +139,104 @@ class TestController extends Controller
         curl_setopt($ch, CURLOPT_POST, 1);
         //curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//浏览器不输出
         curl_setopt($ch, CURLOPT_POSTFIELDS,$json);
+        curl_setopt($ch,CURLOPT_HTTPHEADER,['Content-Type:text/plain']);//发送raw数据
+        // 抓取URL并把它传递给浏览器
+        $cu=curl_exec($ch);
+        //var_dump($cu);
+        $errorcode=curl_errno($ch);
+        if($errorcode>0){
+            die('错误码：'.$errorcode);
+        }
+    }
+    //注册
+    public function register(){
+        $pwd1=request()->input('pwd1');
+        $pwd2=request()->input('pwd2');
+        if($pwd1!=$pwd2){
+            die('密码和确认密码不一致');
+        }
+        $pwd=password_hash($pwd1,PASSWORD_DEFAULT);
+        //邮箱验证
+        $email=request()->input('email');
+        $e=UsersModel::where(['email'=>$email])->first();
+        if($e){
+            die('邮箱存在');
+        }
+        $data=[
+            'name'=>request()->input('name'),
+            'email'=>$email,
+            'pwd'=>$pwd
+        ];
+        $json=json_encode($data);
+        //加密
+        $key=openssl_pkey_get_private('file://'.storage_path('app/keys/private.pem'));
+        openssl_private_encrypt($json,$enc,$key);
+        //var_dump($enc);
+        $base64=base64_encode($enc);
+        //var_dump($base64);
+        $url='http://api.1809a.com/test/register';
+        // 创建一个新cURL资源
+        $ch = curl_init();
+        //echo $ch;die;
+        // 设置URL和相应的选项
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        //curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//浏览器不输出
+        curl_setopt($ch, CURLOPT_POSTFIELDS,$base64);
+        curl_setopt($ch,CURLOPT_HTTPHEADER,['Content-Type:text/plain']);//发送raw数据
+        // 抓取URL并把它传递给浏览器
+        $cu=curl_exec($ch);
+        //var_dump($cu);
+        $errorcode=curl_errno($ch);
+        if($errorcode>0){
+            die('错误码：'.$errorcode);
+        }
+    }
+    //登录
+    public function login(){
+       return view('user/login');
+    }
+    public function logindo(){
+        $name=request()->input('name');
+        $pwd=request()->input('pwd');
+        $info=UsersModel::where(['name'=>$name])->first();
+//        print_r($pwd);echo "<br>";
+//        print_r($info->pwd);die;
+        if($info){
+            if(password_verify($pwd,$info->pwd)){
+                $token=substr(sha1($info->uid.time().str::random(10)),5,15);
+                $key='uid_token'.$_SERVER['REMOTE_ADDR'].$info->uid;
+                $re=Redis::get($key);
+                if($re){
+
+                }else{
+                    Redis::set($key,$token);
+                    Redis::expire($key,604800);
+                }
+                setcookie('token',$re,time()+604800,'/','1809a.com',false,true);
+            }else{
+                die('登录失败');
+            }
+        }else{
+            die('信息不正确');
+        }
+        $data=[
+            'name'=>$name,
+            'pwd'=>$pwd,
+            'email'=>$info->email,
+        ];
+        $json=json_encode($data);
+        $k=openssl_pkey_get_private('file://'.storage_path('app/keys/private.pem'));
+        openssl_private_encrypt($json,$enc,$k);
+        $base64=base64_encode($enc);
+        $url='http://api.1809a.com/test/login';
+        $ch = curl_init();
+        //echo $ch;die;
+        // 设置URL和相应的选项
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        //curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//浏览器不输出
+        curl_setopt($ch, CURLOPT_POSTFIELDS,$base64);
         curl_setopt($ch,CURLOPT_HTTPHEADER,['Content-Type:text/plain']);//发送raw数据
         // 抓取URL并把它传递给浏览器
         $cu=curl_exec($ch);

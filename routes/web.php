@@ -14,6 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/phpinfo', function () {
+    phpinfo();
+});
 //凯撒加密
 Route::get('/test/encode','TestController@cesarEncode');
 Route::get('/test/decode','TestController@cesarDecode');
@@ -25,3 +28,8 @@ Route::get('/test/opcode','TestController@opcode');
 Route::get('/test/rsa','TestController@rsaTest');
 //非对称加密签名
 Route::get('/test/firma','TestController@firma');
+//注册练习
+Route::post('/test/register','TestController@register');
+//登录练习
+Route::get('/test/login','TestController@login');
+Route::post('/test/logindo','TestController@logindo');
