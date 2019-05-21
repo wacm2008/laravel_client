@@ -33,3 +33,20 @@ Route::post('/test/register','TestController@register');
 //登录练习
 Route::get('/test/login','TestController@login');
 Route::post('/test/logindo','TestController@logindo');
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+//企业注册
+Route::middleware('auth')->group(function (){
+    Route::get('/e_register','EmpresaController@register')->name('/e_register')->middleware('auth');
+    Route::post('/e_reg','EmpresaController@reg');
+});
+//获取token
+Route::get('/e_token','TokenController@getAccessToken');
+//ip ua 注册信息
+Route::middleware(['checkToken','filtro'])->group(function (){
+    Route::get('/e_ip','EmpresaController@userIp');
+    Route::get('/e_user_agent','EmpresaController@userAgent');
+    Route::get('/e_reg_info','EmpresaController@regInfo');
+});
