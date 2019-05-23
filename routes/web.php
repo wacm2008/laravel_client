@@ -50,3 +50,7 @@ Route::middleware(['checkToken','filtro'])->group(function (){
     Route::get('/e_user_agent','EmpresaController@userAgent');
     Route::get('/e_reg_info','EmpresaController@regInfo');
 });
+//bootstrap 签到
+Route::get('/boot/login','BootstrapController@login');
+Route::post('/boot/logindo','BootstrapController@logindo');
+Route::get('/boot/sign','BootstrapController@sign');

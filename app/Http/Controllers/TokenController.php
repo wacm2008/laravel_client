@@ -20,7 +20,7 @@ class TokenController extends Controller
         }
         Redis::incr($key_time);
         Redis::expire($key_time,86400);
-        
+
         if(empty($app_id)||empty($app_key)){
             die('参数不全');
         }
